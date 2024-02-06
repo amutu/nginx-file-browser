@@ -16,7 +16,7 @@ $(document).ready(function () {
     function applyTheme() {
         var theme = $('input[name=theme]:checked').val()
 
-        console.log(`setting theme to '${theme}'`)
+        //console.log(`setting theme to '${theme}'`)
 
         $('body')
             .removeClass()
@@ -85,21 +85,21 @@ $(document).ready(function () {
 
         var sortBy = $('input[name=sort]:checked').val();
         if (sortBy === "date") {
-            console.log("sort by date");
+            //console.log("sort by date");
 
             filesData.sort(function (fileA, fileB) {
                 return fileB.mtime.getTime() - fileA.mtime.getTime();
             });
 
         } else if (sortBy === "name") {
-            console.log("sort by name");
+            //console.log("sort by name");
 
             filesData.sort(function (fileA, fileB) {
                 return fileA.name.toLowerCase().localeCompare(fileB.name.toLowerCase());
             });
 
         } else if (sortBy === "size") {
-            console.log("sort by size");
+            //console.log("sort by size");
 
             filesData.sort(function (fileA, fileB) {
                 var sizeA = fileA.rawSize ? fileA.rawSize : Number.MIN_VALUE;
@@ -132,7 +132,7 @@ $(document).ready(function () {
     }
 
     function navigateTo(path) {
-        console.log("navigateTo", path);
+        //console.log("navigateTo", path);
         isNavigating = true;
 
         $.ajax({
@@ -154,15 +154,22 @@ $(document).ready(function () {
                     return fileData;
                 });
 
-                renderFileList(filesData, path);
+		function check_sufix(fileData){
+			return ( fileData.name.endsWith(".mp4") || fileData.name.endsWith('.mp3')) 
+			|| ( fileData.type === "directory");
+		};
+
+		filesData2 = filesData.filter(check_sufix);
+
+                renderFileList(filesData2, path);
 
                 $('input[name=sort]')
                     .unbind("change")
                     .on("change", function () {
-                        renderFileList(filesData, path);
+                        renderFileList(filesData2, path);
                     });
 
-                console.log("replaceState", path);
+                //console.log("replaceState", path);
                 history.replaceState(null, path, '#' + path);
 
 
@@ -170,7 +177,77 @@ $(document).ready(function () {
             },
 
             error: function (jqxhr, textStatus, errorThrown) {
-                console.log(jqxhr, textStatus, errorThrown);
+                //console.log(jqxhr, textStatus, errorThrown);
+
+                if(textStatus === "timeout") {
+                    alert("Request to server timed out, retry later!");
+
+                } else if(textStatus === "abort") {
+                    alert("Connection to server has been aborted, retry later!");
+
+                } else if(textStatus === "parsererror") {
+                    alert("Invalid response from server!");
+
+                } else if(jqxhr.status === 404) {
+                    alert("Server cant find this file/directory!");
+
+                } else {
+                    // also if(textStatus === "error")
+                    alert("Something went wrong in communication to server, retry later!");
+                }
+
+                history.back();
+            }
+        });
+    }
+
+    function search(path,keyword) {
+        //console.log("navigateTo", path);
+        isNavigating = true;
+
+        $.ajax({
+            url: "/bin/search.cgi?" + keyword,
+
+            dataType: "json",
+
+            success: function (filesData) {
+
+                // fix sizes and dates
+                filesData.map(function (fileData) {
+                    fileData.mtime = new Date(fileData.mtime);
+
+                    if (fileData.hasOwnProperty("size")) {
+                        fileData.rawSize = fileData.size;
+                        fileData.size = fileSize(fileData.size);
+                    }
+
+                    return fileData;
+                });
+
+		function check_sufix(fileData){
+			return ( fileData.name.endsWith(".mp4") || fileData.name.endsWith('.mp3')) 
+			|| ( fileData.type === "directory");
+		};
+
+		filesData2 = filesData.filter(check_sufix);
+
+                renderFileList(filesData2, path);
+
+                $('input[name=sort]')
+                    .unbind("change")
+                    .on("change", function () {
+                        renderFileList(filesData2, path);
+                    });
+
+                //console.log("replaceState", path);
+                history.replaceState(null, path, '#' + path);
+
+
+                isNavigating = false;
+            },
+
+            error: function (jqxhr, textStatus, errorThrown) {
+                //console.log(jqxhr, textStatus, errorThrown);
 
                 if(textStatus === "timeout") {
                     alert("Request to server timed out, retry later!");
@@ -224,9 +301,16 @@ $(document).ready(function () {
 
     // apply current theme
     var theme = localStorage.getItem("theme")
-    console.log(`theme '${theme}' loaded`)
+    //console.log(`theme '${theme}' loaded`)
     $(`input[name=theme][value='${theme}']`).prop('checked', true)
     applyTheme()
+
+    $('#btn').click(function (){
+//	console.log('submit');
+//	console.log($("input#keyword").val());
+	search('/',$("input#keyword").val());
+    }
+    );
 
     window.onpopstate = function () {
         if (!isNavigating) {
@@ -235,4 +319,10 @@ $(document).ready(function () {
     };
 
     navigateToUrlLocation();
+});
+
+$(window).keydown(function(e){
+if(e.keyCode == 13){
+$('#btn').click();
+}
 });

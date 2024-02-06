@@ -135,6 +135,16 @@ body.dark .controls {
     color: #ecdbb2;
 }
 
+body.dark input[type=text] {
+    background: #549699;
+    color: #ecdbb2;
+}
+
+body.dark button#btn {
+    background: #549699;
+    color: #ecdbb2;
+}
+
 body.dark input[name="sort"] {
     accent-color: #fe6142;
 }
