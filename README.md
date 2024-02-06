@@ -3,6 +3,7 @@
 This web application is a very simple file browser which can be used
 effectively together with [nginx's autoindex module](http://nginx.org/en/docs/http/ngx_http_autoindex_module.html).
 
+![nginx file browser in action - light theme](image/search.png)
 ![nginx file browser in action - light theme](assets/screenshot-light.jpg)
 ![nginx file browser in action - light theme](assets/screenshot-dark.jpg)
 
