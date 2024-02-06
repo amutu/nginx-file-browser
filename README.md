@@ -46,4 +46,22 @@ shall be changed to
     alias /home/myuser/files-to-serve/;
 ```
 
-And the mounting point is now `/home/myuser/files-to-serve/` instead of `/opt/www/files/`.
+And the mounting point is now `/home/myuser/files-to-serve/` instead of `/opt/www/files/`. 
+
+
+## Search function
+
+You should implement /bin/search.cgi?keyword api to get the search result.  
+For example: 
+```
+curl http://127.0.0.1/bin/search.cgi?Ferguson
+[
+{
+"name":"202401/Craig Ferguson on The Late Show.mp4",
+"type":"file",
+"mtime":"1970-01-01 08:00:00",
+"size":0
+}
+]
+
+```
